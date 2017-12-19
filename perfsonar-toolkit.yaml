@@ -1,0 +1,54 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: perfsonar-toolkit
+  namespace: perfsonar
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: perfsonar-toolkit
+    spec:
+      # hostNetwork: true
+      imagePullSecrets:
+        - name: gcr-json-key
+      containers:
+      - name: perfsonar-toolkit
+        image: us.gcr.io/prp-k8s/perfsonar-toolkit:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 443
+        command:
+          - "/usr/bin/supervisord"
+          - "-c"
+          - "/etc/supervisord.conf"
+        volumeMounts:
+        - name: ssl-key
+          mountPath: /etc/pki/tls/mycert
+      nodeSelector:
+        kubernetes.io/hostname: k8s-nvme-01.sdsc.optiputer.net
+      volumes:
+        - name: ssl-key
+          secret:
+            secretName: ssl-key
+            defaultMode: 256
+            items:
+              - key: key
+                path: ssl.key
+              - key: cert
+                path: ssl.crt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: perfsonar-toolkit
+  namespace: perfsonar
+  labels:
+    k8s-app: perfsonar-toolkit
+spec:
+  ports:
+  - port: 443
+  type: NodePort
+  selector:
+    k8s-app: perfsonar-toolkit
