@@ -1,3 +1,2 @@
-kubectl create -f perfsonar-toolkit.yaml --namespace=kube-public
-kubectl delete -f perfsonar-toolkit.yaml --namespace=kube-public
-
+# Run this in a cluster to deploy a perfsonar instance from perfsonar's image - https://github.com/perfsonar/perfsonar-tools-docker
+kubectl create -f perfsonar.yaml
